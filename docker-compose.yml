@@ -1,0 +1,57 @@
+networks:    # Crate a network for a group of containers, can isolate containers in different networks.
+  app-network:
+    driver: bridge
+
+volumes:     # Crates a volume(folder) on the local machine, this folder stays even if containers are shut down
+  shared-logs:   # Crated this to store logs from the app there, and the monitoring apps will read from here.
+  mongo-data:
+
+services:   # Here we define the services(Containers we want to bring up), they can be also pulled automatically from docker hub
+  app:
+    build: .  # The dot here tells docker that the image to build is located in the current directory, you can define multiple dockerfiles
+    container_name: myApp
+    ports:
+      - "5000:5000"   # Port needs to be exposed to the outside <host>:<container>
+    #environment:   # Here we can define environment variables
+    depends_on:
+      - mongodb    # This container does not start until something is started that it depends on
+    volumes:
+      - shared-logs:/app/logs  # This is a "named volume" it keeps the data localy but can not be transferred to another machine
+    networks:
+      - app-network  # We assign the app to the created network
+    restart: unless-stopped # We assign a restart policy to the container
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    privileged: true
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup/cpu:/cgroup/cpu
+      - /cgroup/cpuacct:/cgroup/cpuacct
+      - /cgroup/cpuset:/cgroup/cpuset
+      - /cgroup/memory:/cgroup/memory
+      - /cgroup/blkio:/cgroup/blkio
+    networks:
+      - app-network
