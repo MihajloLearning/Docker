@@ -4,14 +4,18 @@ networks:    # Crate a network for a group of containers, can isolate containers
 
 volumes:     # Crates a volume(folder) on the local machine, this folder stays even if containers are shut down
   shared-logs:   # Crated this to store logs from the app there, and the monitoring apps will read from here.
+    driver: local  #Presistant volume on local machine
   mongo-data:
-  driver: local
+    driver: local
   prometheus-data:
+    driver: local
   grafana-data:
-    driver: local #Presistant volume on local machine
+    driver: local
   kibana-data:
     driver: local
   elasticsearch-data:
+    driver: local
+
 services:   # Here we define the services(Containers we want to bring up), they can be also pulled automatically from docker hub
   app:
     build: .  # The dot here tells docker that the image to build is located in the current directory, you can define multiple dockerfiles
@@ -116,6 +120,9 @@ services:   # Here we define the services(Containers we want to bring up), they 
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - app-network
     environment:
