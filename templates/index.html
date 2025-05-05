@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add User</title>
-</head>
-<body>
-    <h1>Add User</h1>
-    <form action="/users" method="post">
-        <input type="text" name="name" placeholder="Enter name" required>
-        <button type="submit">Add User</button>
-    </form>
-    <br>
-    <a href="/users">View Users</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Add New User</h2>
+  <form method="POST" action="{{ url_for('create_user') }}">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add User</button>
+  </form>
+{% endblock %}

@@ -5,9 +5,13 @@ networks:    # Crate a network for a group of containers, can isolate containers
 volumes:     # Crates a volume(folder) on the local machine, this folder stays even if containers are shut down
   shared-logs:   # Crated this to store logs from the app there, and the monitoring apps will read from here.
   mongo-data:
+  driver: local
   prometheus-data:
   grafana-data:
-
+    driver: local #Presistant volume on local machine
+  kibana-data:
+    driver: local
+  elasticsearch-data:
 services:   # Here we define the services(Containers we want to bring up), they can be also pulled automatically from docker hub
   app:
     build: .  # The dot here tells docker that the image to build is located in the current directory, you can define multiple dockerfiles
@@ -30,7 +34,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx-status.conf:/etc/nginx/conf.d/status.conf  # Needed for metrics
+      #- ./nginx-status.conf:/etc/nginx/conf.d/status.conf  # Needed for metrics
     depends_on:
       - app
     networks:
@@ -38,7 +42,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     restart: unless-stopped
 
   mongodb:
-    image: mongo:7.0
+    image: mongo:4.4
     container_name: mongodb
     ports:
       - "27017:27017"
@@ -57,6 +61,8 @@ services:   # Here we define the services(Containers we want to bring up), they 
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data 
     ports:
       - "9200:9200"
     networks:
@@ -84,6 +90,8 @@ services:   # Here we define the services(Containers we want to bring up), they 
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+    volumes:
+      - kibana-data:/usr/share/kibana/data
     networks:
       - app-network
     restart: unless-stopped
