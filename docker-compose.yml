@@ -78,7 +78,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     container_name: logstash
     volumes:
       - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - shared-logs:/usr/share/logstash/logs
+      - shared-logs:/app/logs
     depends_on:
       - elasticsearch
     networks:
