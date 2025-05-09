@@ -34,6 +34,12 @@ def fetch_users():
     users = get_all_users()
     return render_template('users.html', users=users)
 
+@app.route('/dashboard/delete', methods=['GET'])
+def delete_user_page():
+    users = get_all_users()
+    return render_template('delete_user.html', users=users)
+
+
 @app.route('/dashboard/users/<user_id>', methods=['GET'])
 def fetch_user(user_id):
     user = get_user_by_id(user_id)
@@ -49,6 +55,7 @@ def delete_user_route(user_id):
         return jsonify({"message": "User deleted"})
     else:
         return jsonify({"error": "User not found"}), 404
+
 
 @app.errorhandler(404)
 def not_found_error(error):

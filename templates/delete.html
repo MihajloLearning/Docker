@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete User</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script>
+        async function deleteUser(userId) {
+            const confirmed = confirm("Are you sure you want to delete this user?");
+            if (!confirmed) return;
+
+            const response = await fetch(`/dashboard/users/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                document.getElementById(`user-${userId}`).remove();
+                alert("User deleted successfully.");
+            } else {
+                const error = await response.json();
+                alert("Error deleting user: " + error.error);
+            }
+        }
+    </script>
+</head>
+<body class="container mt-5">
+    <h1 class="mb-4">Delete Users</h1>
+    {% if users %}
+        <ul class="list-group">
+            {% for user in users %}
+                <li class="list-group-item d-flex justify-content-between align-items-center" id="user-{{ user._id }}">
+                    {{ user.name }}
+                    <button class="btn btn-danger btn-sm" onclick="deleteUser('{{ user._id }}')">Delete</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No users found.</p>
+    {% endif %}
+</body>
+</html>
