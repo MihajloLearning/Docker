@@ -5,9 +5,9 @@
   {% if users %}
     <ul class="list-group">
       {% for user in users %}
-        <li class="list-group-item d-flex justify-content-between align-items-center" id="user-{{ user._id }}">
+        <li class="list-group-item d-flex justify-content-between align-items-center" id="user-{{ user.id }}">
           {{ user.name }}
-          <button class="btn btn-danger btn-sm" onclick="deleteUser('{{ user._id }}')">Delete</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('{{ user.id }}')">Delete</button>
         </li>
       {% endfor %}
     </ul>
