@@ -98,22 +98,27 @@ services:   # Here we define the services(Containers we want to bring up), they 
 
   kibana-importer:
     image: curlimages/curl:latest
+    container_name:  kibana-importer
     depends_on:
       - kibana
     volumes:
       - ./kibana-config/export.ndjson:/usr/share/kibana/export.ndjson
     entrypoint: >
-      sh -c '
-        echo "Waiting for Kibana...";
-        until curl -s http://localhost:5601/api/status | grep -q "\"state\":\"green\""; do
-          sleep 5;
-          echo "Still waiting...";
-        done;
-        echo "Kibana is ready. Importing dashboards...";
-        curl -X POST http://localhost:5601/api/saved_objects/_import \
-          -H "kbn-xsrf: true" \
-          --form file=@/usr/share/kibana/export.ndjson;
-        echo "Import done."      '
+        sh -c '
+          echo "Waiting for Kibana...";
+          until curl -s http://kibana:5601/api/status | grep "\"level\":\"available\""; do
+            sleep 5;
+            echo "Still waiting...";
+          done;
+          echo "Kibana is ready. Importing dashboards...";
+          curl -X POST http://kibana:5601/api/saved_objects/_import \
+            -H "kbn-xsrf: true" \
+            --form file=@/usr/share/kibana/export.ndjson;
+          echo "Import done."
+        '
+    networks:
+     - app-network
+    restart: unless-stopped
 
 
   prometheus:
