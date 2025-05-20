@@ -1,6 +1,8 @@
 networks:    # Crate a network for a group of containers, can isolate containers in different networks.
   app-network:
     driver: bridge
+  monitoring-network:
+    driver: bridge
 
 volumes:     # Crates a volume(folder) on the local machine, this folder stays even if containers are shut down
   shared-logs:   # Crated this to store logs from the app there, and the monitoring apps will read from here.
@@ -66,7 +68,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     ports:
       - "9200:9200"
     networks:
-      - app-network
+      - monitoring-network
     restart: unless-stopped
 
   logstash:
@@ -78,7 +80,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     depends_on:
       - elasticsearch
     networks:
-      - app-network
+      - monitoring-network
     restart: unless-stopped
 
   kibana:
@@ -93,7 +95,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     volumes:
       - kibana-data:/usr/share/kibana/data
     networks:
-      - app-network
+      - monitoring-network
     restart: unless-stopped
 
   kibana-importer:
@@ -117,7 +119,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
           echo "Import done."
         '
     networks:
-     - app-network
+     - monitoring-network
     restart: unless-stopped
 
 
@@ -131,7 +133,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
       - ./Prometheus/prometheus.yml:/etc/prometheus/prometheus.yaml:ro
       - prometheus-data:/prometheus
     networks:
-      - app-network
+      - monitoring-network
     restart: unless-stopped
 
   grafana:
@@ -142,7 +144,7 @@ services:   # Here we define the services(Containers we want to bring up), they 
     volumes:
       - grafana-data:/var/lib/grafana
     networks:
-      - app-network
+      - monitoring-network
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -171,4 +173,4 @@ services:   # Here we define the services(Containers we want to bring up), they 
     - /cgroup/memory:/cgroup/memory
     - /cgroup/blkio:/cgroup/blkio
     networks:
-      - app-network
+      - monitoring-network
