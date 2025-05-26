@@ -96,6 +96,15 @@ services:   # Here we define the services(Containers we want to bring up), they 
       - app-network
     restart: unless-stopped
 
+  kibana-importer:
+    image: curlimages/curl:latest
+    depends_on:
+      - kibana
+    volumes:
+      - ./kibana-config/export.ndjson:/usr/share/kibana/export.ndjson
+      - ./kibana-config/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
+    entrypoint: ["/bin/sh", "-c", "/usr/share/kibana/import_dashboards.sh"]
+
   prometheus:
     image: docker.io/prom/prometheus:latest
     container_name: prometheus
@@ -131,14 +140,19 @@ services:   # Here we define the services(Containers we want to bring up), they 
     ports:
       - "8080:8080"
     volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /cgroup/cpu:/cgroup/cpu
-      - /cgroup/cpuacct:/cgroup/cpuacct
-      - /cgroup/cpuset:/cgroup/cpuset
-      - /cgroup/memory:/cgroup/memory
-      - /cgroup/blkio:/cgroup/blkio
+    # Mount the entire root filesystem as read-only. Allows cAdvisor to access all system-level data.
+    - /:/rootfs:ro
+    # Provides access to Docker-related sockets and process information.
+    - /var/run:/var/run:rw
+    # Grants read-only access to kernel and system information (e.g., CPU, memory).
+    - /sys:/sys:ro
+    # Gives read-only access to Docker container information like logs and metadata.
+    - /var/lib/docker/:/var/lib/docker:ro
+    # Mount cgroup subsystems to gather container-level resource usage metrics.
+    - /cgroup/cpu:/cgroup/cpu
+    - /cgroup/cpuacct:/cgroup/cpuacct
+    - /cgroup/cpuset:/cgroup/cpuset
+    - /cgroup/memory:/cgroup/memory
+    - /cgroup/blkio:/cgroup/blkio
     networks:
       - app-network
